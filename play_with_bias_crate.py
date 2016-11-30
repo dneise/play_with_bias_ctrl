@@ -254,7 +254,7 @@ def other_ramping_experiment(
             df = set_whole_camera(dac)
             dfs.append(df)
         for i in range(N_readings):
-            df = read_whole_camera(dac)
+            df = read_whole_camera()
             dfs.append(df)
 
     for dac in range(high_dac, low_dac-dac_step, -dac_step):
@@ -262,7 +262,7 @@ def other_ramping_experiment(
             df = set_whole_camera(dac)
             dfs.append(df)
         for i in range(N_readings):
-            df = read_whole_camera(dac)
+            df = read_whole_camera()
             dfs.append(df)
     dfs = pd.concat(dfs)
     return dfs
