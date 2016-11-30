@@ -267,4 +267,4 @@ if __name__ == '__main__':
     d.to_hdf('ramp_up_down_whole_camera_experiment__full_data.h5', 'all')
     """
     df = other_ramping_experiment()
-    d.to_hdf('other_ramping_experiment.h5', 'all')
+    df.to_hdf('other_ramping_experiment.h5', 'all')
