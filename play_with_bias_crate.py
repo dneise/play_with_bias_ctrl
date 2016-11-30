@@ -253,8 +253,7 @@ def other_ramping_experiment(
             range(low_dac, high_dac+dac_step, dac_step),
             range(high_dac, low_dac-dac_step, -dac_step))):
         for i in range(N_settings):
-            df = set_whole_camera(dac)
-            dfs.append(df)
+            set_whole_camera(dac)
         for i in range(N_readings):
             df = read_whole_camera(dac)
             dfs.append(df)
