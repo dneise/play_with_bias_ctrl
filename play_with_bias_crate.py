@@ -160,6 +160,50 @@ def ramp_up_down_whole_camera_experiment(full_data=False):
             dfs.append(d)
     return pd.concat(dfs)
 
+
+def set_whole_camera(dac):
+    boards = np.arange(10, dtype=np.uint8).repeat(32)
+    channels = np.arange(32, dtype=np.uint8).tile(10)
+    cmds = b''
+    for i in range(len(boards)):
+        cmds += make_send_bytes(
+            commands['set'],
+            board=boards[i],
+            channel=channels[i],
+            voltage=dac
+            )
+
+    start_time = time.time()
+    ser.write(cmds)
+    answer = b''
+    while not len(answer) == len(cmds):
+        answer += ser.read(len(cmds) - len(answer))
+    stop_time = time.time()
+    df = pd.DataFrame([
+        make_answer(answer[i*3:(i+1)*3]) for i in range(len(answer)//3)
+    ])
+    df['Time'] = pd.to_datetime(
+        np.linspace(start_time, stop_time, len(answer)//3) * 1e9,
+        unit='ns'
+        )
+    df['dac'] = dac
+    df['channel'] = channels
+    df['board_'] = boards
+
+    # change dtypes, so df is nice and small
+    df['current'] = df['current'].astype(np.uint16)
+    df['counter'] = df['counter'].astype(np.uint8)
+    df['over_current'] = df['over_current'].astype(np.bool)
+    df['errors'] = df['errors'].astype(np.uint8)
+    df['board'] = df['board'].astype(np.int8)
+    df['dac'] = df['dac'].astype(np.uint16)
+
+    return check_and_delete_cols(df)
+
+
+"""
 if __name__ == '__main__':
+
     d = ramp_up_down_whole_camera_experiment(full_data=True)
     d.to_hdf('ramp_up_down_whole_camera_experiment__full_data.h5', 'all')
+    """
