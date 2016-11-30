@@ -201,6 +201,72 @@ def set_whole_camera(dac):
     return check_and_delete_cols(df)
 
 
+def read_whole_camera():
+    boards = np.repeat(np.arange(10, dtype=np.uint8), 32)
+    channels = np.tile(np.arange(32, dtype=np.uint8), 10)
+    cmds = b''
+    for i in range(len(boards)):
+        cmds += make_send_bytes(
+            commands['read'],
+            board=boards[i],
+            channel=channels[i],
+            voltage=0
+            )
+
+    start_time = time.time()
+    ser.write(cmds)
+    answer = b''
+    while not len(answer) == len(cmds):
+        answer += ser.read(len(cmds) - len(answer))
+    stop_time = time.time()
+    df = pd.DataFrame([
+        make_answer(answer[i*3:(i+1)*3]) for i in range(len(answer)//3)
+    ])
+    df['Time'] = pd.to_datetime(
+        np.linspace(start_time, stop_time, len(answer)//3) * 1e9,
+        unit='ns'
+        )
+    df['dac'] = dac
+    df['channel'] = channels
+    df['board_'] = boards
+
+    # change dtypes, so df is nice and small
+    df['current'] = df['current'].astype(np.uint16)
+    df['counter'] = df['counter'].astype(np.uint8)
+    df['over_current'] = df['over_current'].astype(np.bool)
+    df['errors'] = df['errors'].astype(np.uint8)
+    df['board'] = df['board'].astype(np.int8)
+    df['dac'] = df['dac'].astype(np.uint16)
+
+    return check_and_delete_cols(df)
+
+
+def other_ramping_experiment(
+        low_dac=0,
+        high_dac=200,
+        dac_step=25,
+        N_settings=1,
+        N_readings=19):
+
+    dfs = []
+    for dac in range(low_dac, high_dac+dac_step, dac_step):
+        for i in range(N_settings):
+            df = set_whole_camera(dac)
+            dfs.append(df)
+        for i in range(N_readings):
+            df = read_whole_camera(dac)
+            dfs.append(df)
+
+    for dac in range(high_dac, low_dac-dac_step, -dac_step):
+        for i in range(N_settings):
+            df = set_whole_camera(dac)
+            dfs.append(df)
+        for i in range(N_readings):
+            df = read_whole_camera(dac)
+            dfs.append(df)
+    dfs = pd.concat(dfs)
+    return dfs
+
 """
 if __name__ == '__main__':
 
