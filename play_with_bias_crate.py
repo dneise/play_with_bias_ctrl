@@ -107,3 +107,29 @@ def check_and_delete_cols(df):
         df.drop('counter', axis=1, inplace=True)
 
     return df
+
+
+def ramp_up_down_experiment(
+        channel=0,
+        board=0,
+        low_dac=0,
+        high_dac=200,
+        dac_step=10,
+        N_settings=1,
+        N_readings=200,
+        delay=0
+        ):
+    up_dacs = list(range(low_dac, high_dac+dac_step, dac_step))
+    dacs = up_dacs + up_dacs[::-1]
+
+    dfs = []
+    for dac in dacs:
+        df = set_voltage_M_times_read_N_times(
+            board=board,
+            channel=channel,
+            voltage=dac,
+            M=N_settings,
+            N=N_readings)
+        df.append(dfs)
+        time.sleep(delay)
+    return dfs
