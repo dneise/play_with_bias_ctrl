@@ -130,6 +130,6 @@ def ramp_up_down_experiment(
             voltage=dac,
             M=N_settings,
             N=N_readings)
-        df.append(dfs)
+        dfs.append(df)
         time.sleep(delay)
     return dfs
