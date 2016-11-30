@@ -276,5 +276,5 @@ if __name__ == '__main__':
     d = ramp_up_down_whole_camera_experiment(full_data=True)
     d.to_hdf('ramp_up_down_whole_camera_experiment__full_data.h5', 'all')
     """
-    df = other_ramping_experiment()
-    df.to_hdf('other_ramping_experiment.h5', 'all')
+    df = other_ramping_experiment(high_dac=3000, dac_step=50)
+    df.to_hdf('other_ramping_experiment_step50_end3000.h5', 'all')
