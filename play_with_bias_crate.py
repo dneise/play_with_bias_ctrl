@@ -144,7 +144,7 @@ def ramp_up_down_experiment(
     return dfs
 
 
-def ramp_up_down_whole_camera_experiment():
+def ramp_up_down_whole_camera_experiment(full_data=False):
     dfs = []
     for board in trange(10):
         for channel in range(32):
@@ -154,7 +154,12 @@ def ramp_up_down_whole_camera_experiment():
                 dac_step=25,
                 high_dac=200,
                 )
-            d = d[d.index >= 150]
-            d = d[d.dac >= 100]
+            if not full_data:
+                d = d[d.index >= 150]
+                d = d[d.dac >= 100]
             dfs.append(d)
-    return dfs
+    return pd.concat(dfs)
+
+if __name__ == '__main__':
+    d = ramp_up_down_whole_camera_experiment(full_data=True)
+    d.to_hdf('ramp_up_down_whole_camera_experiment__full_data.h5', 'all')
