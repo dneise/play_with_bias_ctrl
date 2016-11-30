@@ -162,8 +162,8 @@ def ramp_up_down_whole_camera_experiment(full_data=False):
 
 
 def set_whole_camera(dac):
-    boards = np.arange(10, dtype=np.uint8).repeat(32)
-    channels = np.arange(32, dtype=np.uint8).tile(10)
+    boards = np.repeat(np.arange(10, dtype=np.uint8), 32)
+    channels = np.tile(np.arange(32, dtype=np.uint8), 10)
     cmds = b''
     for i in range(len(boards)):
         cmds += make_send_bytes(
