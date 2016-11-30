@@ -119,17 +119,30 @@ def ramp_up_down_experiment(
         N_readings=200,
         delay=0
         ):
-    up_dacs = list(range(low_dac, high_dac+dac_step, dac_step))
-    dacs = up_dacs + up_dacs[::-1]
 
-    dfs = []
-    for dac in dacs:
+    up = []
+    for dac in range(low_dac, high_dac+dac_step, dac_step):
         df = set_voltage_M_times_read_N_times(
             board=board,
             channel=channel,
             voltage=dac,
             M=N_settings,
             N=N_readings)
-        dfs.append(df)
+        up.append(df)
         time.sleep(delay)
-    return dfs
+    up = pd.concat(up)
+
+    down = []
+    for dac in range(high_dac, low_dac-dac_step, -dac_step):
+        df = set_voltage_M_times_read_N_times(
+            board=board,
+            channel=channel,
+            voltage=dac,
+            M=N_settings,
+            N=N_readings)
+        down.append(df)
+        time.sleep(delay)
+    down = pd.concat(down)
+
+
+    return up, down
