@@ -99,9 +99,9 @@ def check_and_delete_cols(df):
     else:
         df.drop('errors', axis=1, inplace=True)
 
-    counter_start = a.counter.iloc[0]
+    counter_start = df.counter.iloc[0]
     comparison_counter = np.arange(counter_start, counter_start + len(df)) % 8
-    if not (a.counter == comparison_counter).all():
+    if not (df.counter == comparison_counter).all():
         print("the 3-bit wrap counter does not always count up")
     else:
         df.drop('counter', axis=1, inplace=True)
