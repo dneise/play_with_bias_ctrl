@@ -6,7 +6,7 @@ import struct
 import time
 import pandas as pd
 from itertools import zip_longest
-
+from tqdm import tqdm, trange
 from collections import namedtuple
 
 ser = serial.Serial('/dev/serial/by-id/usb-FTDI_UM245R_FTE03K4V-if00-port0')
@@ -143,20 +143,18 @@ def ramp_up_down_experiment(
     dfs = pd.concat(dfs)
     return dfs
 
-from tqdm import tqdm, trange
-def ramp_up_down_whole_camera_experiment()
 
+def ramp_up_down_whole_camera_experiment():
     dfs = []
     for board in trange(10):
         for channel in range(32):
-
-        d = ramp_up_down_experiment(
-            channel=channel,
-            board=board,
-            dac_step=25,
-            high_dac=200,
-            )
-        d = d[d.index >= 150]
-        d = d[d.dac >= 100]
-
-        dfs.append(d)
+            d = ramp_up_down_experiment(
+                channel=channel,
+                board=board,
+                dac_step=25,
+                high_dac=200,
+                )
+            d = d[d.index >= 150]
+            d = d[d.dac >= 100]
+            dfs.append(d)
+    return dfs
