@@ -13,7 +13,7 @@ ser = serial.Serial('/dev/serial/by-id/usb-FTDI_UM245R_FTE03K4V-if00-port0')
 ser.timeout = 1
 commands = {'reset': 0, 'read': 1, 'set': 3}
 
-Answer = namedtuple('Answer', 'current, counter, status, errors, board')
+Answer = namedtuple('Answer', 'current, counter, over_current, errors, board')
 
 
 def grouper(iterable, num, fillvalue=None):
@@ -37,7 +37,7 @@ def make_answer(string):
     return Answer(
         current=(word >> 8) & 0xfff,
         counter=(word >> 20) & 0x7,
-        status=(word >> 23) & 0x1,
+        over_current=(word >> 23) & 0x1,
         errors=(word >> 4) & 0xf,
         board=word & 0xf
         )
@@ -73,11 +73,37 @@ def set_voltage_M_times_read_N_times(board, channel, voltage, M=1, N=0):
     # change dtypes, so df is nice and small
     df['current'] = df['current'].astype(np.uint16)
     df['counter'] = df['counter'].astype(np.uint8)
-    df['status'] = df['status'].astype(np.bool)
+    df['over_current'] = df['over_current'].astype(np.bool)
     df['errors'] = df['errors'].astype(np.uint8)
     df['board'] = df['board'].astype(np.int8)
     df['dac'] = df['dac'].astype(np.uint16)
     df['channel'] = df['channel'].astype(np.uint8)
     df['board_'] = df['board_'].astype(np.uint8)
+
+    return check_and_delete_cols(df)
+
+
+def check_and_delete_cols(df):
+    if not (df.board_ == df.board).all():
+        print("no all boards equal - should never happen")
+    else:
+        df.drop('board_', axis=1, inplace=True)
+
+    if df.over_current.any():
+        print("over_current bit was set")
+    else:
+        df.drop('over_current', axis=1, inplace=True)
+
+    if df.errors.any():
+        print("some error bits were set")
+    else:
+        df.drop('errors', axis=1, inplace=True)
+
+    counter_start = a.counter.iloc[0]
+    comparison_counter = np.arange(counter_start, counter_start + len(df)) % 8
+    if not (a.counter == comparison_counter).all():
+        print("the 3-bit wrap counter does not always count up")
+    else:
+        df.drop('counter', axis=1, inplace=True)
 
     return df
