@@ -35,7 +35,7 @@ def make_answer(string):
         string = b'\x00' + string
     word = struct.unpack('!I', string)[0]
     return Answer(
-        current=(word >> 8) & 0xfff,
+        current=(word >> 9) & 0x7ff, # its an 11-bit ADC really.
         counter=(word >> 20) & 0x7,
         over_current=(word >> 23) & 0x1,
         errors=(word >> 4) & 0xf,
