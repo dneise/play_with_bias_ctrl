@@ -166,12 +166,23 @@ def set_whole_camera(dac):
     channels = np.tile(np.arange(32, dtype=np.uint8), 10)
     cmds = b''
     for i in range(len(boards)):
-        cmds += make_send_bytes(
-            commands['set'],
-            board=boards[i],
-            channel=channels[i],
-            voltage=dac
-            )
+        b = boards[i]
+        c = channels[i]
+        if b==8 and c==16:
+            # we never set channel (8,16) == 272, cause it has a short
+            cmds += make_send_bytes(
+                commands['read'],
+                board=b,
+                channel=c,
+                voltage=dac
+                )
+        else:
+            cmds += make_send_bytes(
+                commands['set'],
+                board=b,
+                channel=c,
+                voltage=dac
+                )
 
     start_time = time.time()
     ser.write(cmds)
@@ -243,7 +254,7 @@ def read_whole_camera(dac):
 
 def other_ramping_experiment(
         low_dac=0,
-        high_dac=200,
+        high_dac=1000,
         dac_step=25,
         N_settings=1,
         N_readings=50):
