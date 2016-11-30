@@ -201,7 +201,7 @@ def set_whole_camera(dac):
     return check_and_delete_cols(df)
 
 
-def read_whole_camera():
+def read_whole_camera(dac):
     boards = np.repeat(np.arange(10, dtype=np.uint8), 32)
     channels = np.tile(np.arange(32, dtype=np.uint8), 10)
     cmds = b''
@@ -254,7 +254,7 @@ def other_ramping_experiment(
             df = set_whole_camera(dac)
             dfs.append(df)
         for i in range(N_readings):
-            df = read_whole_camera()
+            df = read_whole_camera(dac)
             dfs.append(df)
 
     for dac in range(high_dac, low_dac-dac_step, -dac_step):
@@ -262,7 +262,7 @@ def other_ramping_experiment(
             df = set_whole_camera(dac)
             dfs.append(df)
         for i in range(N_readings):
-            df = read_whole_camera()
+            df = read_whole_camera(dac)
             dfs.append(df)
     dfs = pd.concat(dfs)
     return dfs
