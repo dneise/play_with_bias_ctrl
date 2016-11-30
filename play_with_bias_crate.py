@@ -5,7 +5,7 @@ import serial
 import struct
 import time
 import pandas as pd
-from itertools import zip_longest
+from itertools import chain
 from tqdm import tqdm, trange
 from collections import namedtuple
 
@@ -246,18 +246,12 @@ def other_ramping_experiment(
         high_dac=200,
         dac_step=25,
         N_settings=1,
-        N_readings=19):
+        N_readings=50):
 
     dfs = []
-    for dac in range(low_dac, high_dac+dac_step, dac_step):
-        for i in range(N_settings):
-            df = set_whole_camera(dac)
-            dfs.append(df)
-        for i in range(N_readings):
-            df = read_whole_camera(dac)
-            dfs.append(df)
-
-    for dac in range(high_dac, low_dac-dac_step, -dac_step):
+    for dac in tqdm(chain(
+            range(low_dac, high_dac+dac_step, dac_step),
+            range(high_dac, low_dac-dac_step, -dac_step))):
         for i in range(N_settings):
             df = set_whole_camera(dac)
             dfs.append(df)
@@ -267,9 +261,10 @@ def other_ramping_experiment(
     dfs = pd.concat(dfs)
     return dfs
 
-"""
 if __name__ == '__main__':
-
+    """
     d = ramp_up_down_whole_camera_experiment(full_data=True)
     d.to_hdf('ramp_up_down_whole_camera_experiment__full_data.h5', 'all')
     """
+    df = other_ramping_experiment()
+    d.to_hdf('other_ramping_experiment.h5', 'all')
